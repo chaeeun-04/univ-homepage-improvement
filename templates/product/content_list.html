@@ -2,22 +2,47 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>서울신학대학교</title>
 </head>
 <body>
-<h1>서울신학대학교</h1>
-<form action="{% url 'search' %}" method="GET">
-  <input type="text" name="q" placeholder="검색어를 입력하세요...">
-  <button type="submit">검색</button>
-</form>
-{% if content_list %}
-    {% for content in content_list %}
-        <hr/>
-        <h3><a href="/product/{{ content.id }}/">{{ content.title }}</a></h3>
-        <h5>{{ content.content }}</h5>
-    {% endfor %}
-{% else %}
-    <p>content가 없습니다.</p>
-{% endif %}
+
+    <h1>서울신학대학교</h1>
+
+    <form action="{% url 'product:list' %}" method="get" style="margin-bottom: 20px;">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="검색어를 입력하세요..."
+            value="{{ query|default_if_none:'' }}"
+            style="width: 300px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;"
+        >
+        <button type="submit" style="padding: 5px 10px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px;">검색</button>
+    </form>
+
+    <hr/>
+
+    {% if query %}
+        <h1>검색 결과: "{{ query }}" (총 {{ content_list.count }}건)</h1>
+    {% else %}
+    {% endif %}
+
+    {% if content_list %}
+        {% for content in content_list %}
+            <h3><a href="/product/{{ content.id }}/">{{ content.title }}</a></h3>
+
+            <h5 style="font-weight: normal;">{{ content.content|truncatechars:100 }}</h5>
+            <small>게시일: {{ content.pub_date|date:"Y년 m월 d일" }}</small>
+            <hr style="border: 0; border-top: 1px dashed #ccc;"/>
+        {% endfor %}
+    {% else %}
+
+        {% if query %}
+            <p>"{{ query }}"에 대한 검색 결과가 없습니다. 다른 검색어로 다시 시도해 보세요.</p>
+        {% else %}
+            <p>content가 없습니다.</p>
+        {% endif %}
+    {% endif %}
 </body>
 </html>
+

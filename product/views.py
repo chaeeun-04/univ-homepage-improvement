@@ -1,66 +1,35 @@
 print("===== product/views.py 파일을 읽었습니다! =====")
 from django.shortcuts import render
+from django.db.models import Q  # Q 객체를 임포트합니다. (검색 로직의 핵심)
+
+# 'product_data.json'의 내용을 보니 모델 이름이 'MainContent'입니다.
 from .models import MainContent
-from .models import Notice, Event
-from django.db.models import Q
+
+
+# from .models import Notice, Event # <-- 지금은 MainContent만 검색하므로 일단 주석 처리
 
 def index(request):
     print("===== index 페이지가 로드되었습니다! =====")
-    content_list = MainContent.objects.all()
-    context = {'content_list': content_list}
-    return render(request, 'product/content_list.html', context)
 
-
-def search_results(request):
-    print("--- 1. 검색 요청 받음 ---")
 
     query = request.GET.get('q')
-    all_results = []
+
+    content_list = MainContent.objects.order_by('-pub_date')
 
     if query:
-        print(f"--- 2. 검색어 '{query}' 확인 ---")
 
-        notice_results = Notice.objects.filter(
-            Q(title__icontains=query) | Q(content__icontains=query)
-        )
-
-        event_results = Event.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-        )
-
-        print("--- 3. DB 쿼리 준비 완료 (아직 실행 전) ---")
-
-        for notice in notice_results:
-            all_results.append({
-                'type': '공지사항',
-                'title': notice.title,
-                'url': '#'
-            })
-
-        print("--- 4. Notice 모델 검색 완료 ---")
-
-        for event in event_results:
-            all_results.append({
-                'type': '행사',
-                'title': event.name,
-                'url': '#'
-            })
-
-        print("--- 5. Event 모델 검색 완료 ---")
-
+        print(f"--- 2. 검색어 '{query}'로 MainContent 검색 시작 ---")
+        content_list = content_list.filter(
+            Q(title__icontains=query) |  # MainContent의 제목
+            Q(content__icontains=query)  # MainContent의 내용
+        ).distinct()  # 중복 결과 제거
     else:
-        query = ""
-        print("--- 2. 검색어 없음 ---")
+        print("--- 2. 검색어 없음. 전체 목록 표시 ---")
+
 
     context = {
-        'query': query,
-        'results': all_results,
+        'content_list': content_list,
+        'query': query,  # 템플릿에 검색어를 넘겨주어 폼에 값을 유지
     }
 
-    print("--- 6. 템플릿 렌더링 시작 ---")
-
-    response = render(request, 'product/search_results.html', context)
-
-    print("--- 7. 렌더링 완료. 응답 보냄 ---")
-
-    return response
+    return render(request, 'product/content_list.html', context)
