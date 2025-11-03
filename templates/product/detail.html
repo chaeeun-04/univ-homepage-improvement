@@ -1,0 +1,18 @@
+{% extends 'base.html' %} {% block content %} <h2>{{ post.title }}</h2>
+    
+    <p>
+        <strong>카테고리:</strong> {{ post.category.name }} <br>
+        <strong>게시일:</strong> {{ post.created_at|date:"Y년 m월 d일" }}
+    </p>
+    
+    <hr>
+    
+    <div>
+        {{ post.content|linebreaksbr }}
+    </div>
+    
+    <hr>
+    
+    <a href="{% url 'product:list' %}">목록으로</a>
+
+{% endblock %} ```

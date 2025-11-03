@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>서울신학대학교</title>
+</head>
+<body>
+    <h1>서울신학대학교</h1>
+
+    <form action="{% url 'product:search' %}" method="GET">
+        <input type="text" name="q" placeholder="검색어를 입력하세요..." value="{{ query|default_if_none:'' }}">
+        <button type="submit">검색</button>
+    </form>
+
+    <hr>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

@@ -1,35 +1,45 @@
-print("===== product/views.py 파일을 읽었습니다! =====")
-from django.shortcuts import render
-from django.db.models import Q  # Q 객체를 임포트합니다. (검색 로직의 핵심)
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
+from .models import Category, Post
 
-# 'product_data.json'의 내용을 보니 모델 이름이 'MainContent'입니다.
-from .models import MainContent
-
-
-# from .models import Notice, Event # <-- 지금은 MainContent만 검색하므로 일단 주석 처리
 
 def index(request):
-    print("===== index 페이지가 로드되었습니다! =====")
+    categories = Category.objects.all()
+    context = {'categories': categories}
+    return render(request, 'product/content_list.html', context)
 
 
+def search_results(request):
     query = request.GET.get('q')
+    all_results = []
 
-    content_list = MainContent.objects.order_by('-pub_date')
+    search_posts = []
 
     if query:
+        search_posts = Post.objects.filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )
 
-        print(f"--- 2. 검색어 '{query}'로 MainContent 검색 시작 ---")
-        content_list = content_list.filter(
-            Q(title__icontains=query) |  # MainContent의 제목
-            Q(content__icontains=query)  # MainContent의 내용
-        ).distinct()  # 중복 결과 제거
+        for post in search_posts:
+            all_results.append({
+                'type': post.category.name,
+                'title': post.title,
+                'id': post.id
+            })
+
     else:
-        print("--- 2. 검색어 없음. 전체 목록 표시 ---")
-
+        query = ""
 
     context = {
-        'content_list': content_list,
-        'query': query,  # 템플릿에 검색어를 넘겨주어 폼에 값을 유지
+        'query': query,
+        'results': all_results,
     }
+    return render(request, 'product/search_results.html', context)
 
-    return render(request, 'product/content_list.html', context)
+
+def detail(request, content_id):
+    post = get_object_or_404(Post, pk=content_id)
+    context = {
+        'post': post
+    }
+    return render(request, 'product/detail.html', context)
