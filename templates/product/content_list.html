@@ -20,4 +20,128 @@
         <p>표시할 카테고리가 없습니다. 관리자 페이지에서 Category를 추가해 주세요.</p>
     {% endfor %}
 
+
+<div id="menu-toggle-button" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #3f51b5;
+    color: white;
+    font-size: 30px;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+">
+
+    <div>☰</div>
+
+</div>
+
+<div id="full-menu-panel" style="
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    padding: 10px;
+    display: none;
+    font-family: Arial, sans-serif;
+">
+    <!-- 1차 메뉴 (학사안내, 대학생활) -->
+    <div id="menu-level-1">
+        <h4 style="margin: 5px 0 10px 0; color: #3f51b5;">전체 메뉴</h4>
+        <div class="menu-item-primary" data-target="academic" style="cursor: pointer; padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">
+            학사안내 &gt;
+        </div>
+        <div class="menu-item-primary" data-target="campus-life" style="cursor: pointer; padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">
+            대학생활 &gt;
+        </div>
+    </div>
+
+    <!-- 2차 메뉴  -->
+    <div id="menu-level-2" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; display: none;">
+        <div class="menu-back-button" style="cursor: pointer; color: #f44336; font-weight: bold; margin-bottom: 10px;">
+            &lt; 뒤로가기
+        </div>
+
+        <!-- 학사안내 2차 메뉴 -->
+        <div class="menu-group" id="academic-menu" style="display: none;">
+            <h5 style="margin: 0 0 10px 0; color: #555;">[학사안내]</h5>
+            <!-- 친구의 클릭 수 집계 대상 버튼들 -->
+            <a href="서식자료실"  class="menu-button" data-name="서식자료실" style="display: block; padding: 8px; margin-bottom: 5px; background-color: #e3f2fd; border-radius: 4px; text-decoration: none; color: #000;">서식자료실</a>
+            <a href="졸업요건"  class="menu-button" data-name="졸업" style="display: block; padding: 8px; margin-bottom: 5px; background-color: #e3f2fd; border-radius: 4px; text-decoration: none; color: #000;">졸업요건</a>
+            <a href="종합강의시간표" class="menu-button" data-name="종합강의시간표" style="display: block; padding: 8px; margin-bottom: 5px; background-color: #e3f2fd; border-radius: 4px; text-decoration: none; color: #000;">종합강의시간표</a>
+        </div>
+
+        <!-- 대학생활 2차 메뉴 -->
+        <div class="menu-group" id="campus-life-menu" style="display: none;">
+            <h5 style="margin: 0 0 10px 0; color: #555;">[대학생활]</h5>
+            <!--  클릭 수 집계 대상 버튼 -->
+            <a href="식당게시판" class="menu-button" data-name="식당게시판" style="display: block; padding: 8px; margin-bottom: 5px; background-color: #e8f5e9; border-radius: 4px; text-decoration: none; color: #000;">식당게시판</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('menu-toggle-button');
+    const menuPanel = document.getElementById('full-menu-panel');
+    const level1 = document.getElementById('menu-level-1');
+    const level2 = document.getElementById('menu-level-2');
+    const backButton = menuPanel.querySelector('.menu-back-button');
+    const primaryItems = menuPanel.querySelectorAll('.menu-item-primary');
+
+    let currentMenu = null;
+
+    toggleButton.addEventListener('mouseenter', function() {
+        menuPanel.style.display = 'block';
+    });
+
+    menuPanel.addEventListener('mouseleave', function() {
+        if (!level2.style.display || level2.style.display === 'none') {
+            menuPanel.style.display = 'none';
+        }
+    });
+
+    primaryItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+
+            level1.style.display = 'none';
+
+            level2.style.display = 'block';
+
+            menuPanel.querySelectorAll('.menu-group').forEach(group => {
+                group.style.display = 'none';
+            });
+
+            const targetMenu = document.getElementById(targetId + '-menu');
+            if (targetMenu) {
+                targetMenu.style.display = 'block';
+            }
+            currentMenu = targetId;
+        });
+    });
+
+    backButton.addEventListener('click', function() {
+        level2.style.display = 'none';
+        menuPanel.querySelectorAll('.menu-group').forEach(group => {
+            group.style.display = 'none';
+        });
+
+        level1.style.display = 'block';
+        currentMenu = null;
+    });
+});
+</script>
+
 {% endblock %}
