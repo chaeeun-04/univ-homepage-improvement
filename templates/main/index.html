@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% for category in all_categories %}
+
+        <h2>{{ category.name }}</h2>
+
+        <div>
+            {% for post in category.recent_posts %}
+                <div>
+                    <a href="{% url 'product:detail' post.id %}">{{ post.title }}</a><br>
+                    <span>게시일: {{ post.created_at|date:"Y년 m월 d일" }}</span>
+                </div>
+            {% empty %}
+                <p>게시글이 없습니다.</p>
+            {% endfor %}
+        </div>
+        <hr>
+
+    {% empty %}
+        <p>표시할 카테고리가 없습니다.</p>
+    {% endfor %}
+
+    <section class="quick-menu">
+        <h2>자주 찾는 메뉴 (상위 2개)</h2>
+        <div class="menu-items">
+            {% for menu in top_menus %}
+                <a href="{% url 'track_click' menu_name_pk=menu.menu_name %}" class="menu-item">
+                    <span>{{ menu.display_name }} (클릭: {{ menu.click_count }}회)</span>
+                </a>
+            {% empty %}
+                <p>아직 집계된 메뉴가 없습니다.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+{% endblock %}

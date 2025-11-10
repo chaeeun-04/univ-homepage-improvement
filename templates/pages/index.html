@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>자주찾는메뉴</title>
+    </head>
+<body>
+    <h1>자주찾는메뉴</h1>
+
+    <hr>
+
+    <section class="quick-menu">
+        <h2>자주 찾는 메뉴 (상위 2개)</h2>
+        <div class="menu-items">
+
+            {% for menu in top_menus %}
+                <a href="{% url 'track_click' menu_name_pk=menu.menu_name %}" class="menu-item">
+                    <span>{{ menu.display_name }} (클릭: {{ menu.click_count }}회)</span>
+                </a>
+            {% empty %}
+                <p>아직 집계된 메뉴가 없습니다.</p>
+            {% endfor %}
+
+        </div>
+    </section>
+    </body>
+</html>
