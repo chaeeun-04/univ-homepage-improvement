@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .match-container {
+        max-width: 500px;
+        margin: 50px auto;
+        text-align: center;
+        font-family: 'Noto Sans KR', sans-serif;
+        position: relative; /* 모달 위치 기준 */
+    }
+
+    /* 카드 스타일 */
+    .card-wrapper {
+        position: relative;
+        height: 500px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .profile-emoji { font-size: 80px; margin-bottom: 20px; background: #f0f2f5; width: 150px; height: 150px; line-height: 150px; border-radius: 50%; }
+    .info-badge { background: #e3f2fd; color: #1e88e5; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+    .user-name { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .one-line-intro { color: #666; font-size: 16px; margin-bottom: 30px; padding: 0 20px; line-height: 1.5; word-break: keep-all; }
+
+    /* 버튼 영역 */
+    .action-buttons { margin-top: 30px; display: flex; justify-content: center; gap: 30px; }
+    .btn-action { width: 70px; height: 70px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .btn-pass { background: white; color: #ff5252; border: 2px solid #ff5252; }
+    .btn-like { background: #4caf50; color: white; }
+    .btn-action:hover { transform: scale(1.1); }
+
+    /* 등록 버튼 */
+    .btn-register { margin-bottom: 20px; padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+    .contact-info { display: none; margin-top: 15px; color: #333; font-weight: bold; background: #fff9c4; padding: 10px; border-radius: 10px; width: 80%; }
+
+    /* ========================== */
+    /* ▼ 모달(팝업창) 스타일 추가 */
+    /* ========================== */
+    .modal-overlay {
+        display: none; /* 평소엔 숨김 */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* 반투명 검은 배경 */
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-box {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        text-align: left;
+    }
+
+    .modal-box h3 { margin-top: 0; text-align: center; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 10px;
+        border: 1px solid #ddd; border-radius: 5px;
+        box-sizing: border-box; /* 패딩 포함 크기 계산 */
+    }
+
+    .btn-submit { width: 100%; padding: 12px; background: #3f51b5; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+    .btn-close { width: 100%; padding: 10px; background: #eee; color: #333; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+
+</style>
+
+<div class="match-container">
+    <div style="text-align: right;">
+        <button class="btn-register" onclick="openModal()">📝 내 카드 등록하기</button>
+    </div>
+
+    <div class="card-wrapper" id="card-area">
+        <div class="profile-emoji" id="p-emoji">🦁</div>
+        <span class="info-badge" id="p-field">분야</span>
+        <h2 class="user-name" id="p-name">로딩중...</h2>
+        <p class="one-line-intro" id="p-intro">잠시만 기다려주세요...</p>
+        <div class="contact-info" id="p-contact"></div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-action btn-pass" onclick="nextCard(false)">✕</button>
+        <button class="btn-action btn-like" onclick="nextCard(true)">♥</button>
+    </div>
+</div>
+
+<div id="registerModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>내 프로필 등록 📝</h3>
+
+        <div class="form-group">
+            <label>이모지 (스터디/공모전)</label>
+            <select id="input-emoji">
+                <option value="👩‍💻">👩‍💻 스터디</option>
+                <option value="💡">💡 공모전</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>이름 (닉네임)</label>
+            <input type="text" id="input-name" placeholder="예: 김코딩">
+        </div>
+
+        <div class="form-group">
+            <label>관심 분야</label>
+            <input type="text" id="input-field" placeholder="예: 백엔드, 디자인...">
+        </div>
+
+        <div class="form-group">
+            <label>한줄 소개</label>
+            <textarea id="input-intro" rows="2" placeholder="같이 공모전 나가실 분 구해요!"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>연락처 (매칭되면 보여요)</label>
+            <input type="text" id="input-contact" placeholder="예: 카톡ID, 이메일...">
+        </div>
+
+        <button class="btn-submit" onclick="submitCard()">등록 완료</button>
+        <button class="btn-close" onclick="closeModal()">취소</button>
+    </div>
+</div>
+
+<script>
+    // 예시 데이터
+    const dummyUsers = [
+        { name: "김토익", field: "토익", intro: "토익 공부 같이 하실 분 찾아요!.", emoji: "👨‍💻", contact: "카톡ID: yanado_1" },
+        { name: "이공모", field: "IT", intro: "SW 웹/앱 개발 공모전 나가실 분 찾습니다.", emoji: "💡", contact: "이메일: negajeil@jal.naga" },
+        { name: "박디자", field: "UI/UX 디자인", intro: "피그마 잘 다룹니다. 포트폴리오 같이 만드실 분!", emoji: "👨‍💻", contact: "인스타: @design_park" },
+    ];
+
+    let currentIndex = 0;
+
+    // 2. 카드 렌더링 함수
+    function renderCard() {
+        const user = dummyUsers[currentIndex];
+        const cardArea = document.getElementById('card-area');
+        const btnArea = document.querySelector('.action-buttons');
+
+        // 카드가 더이상 없을 때
+        if (!user) {
+            cardArea.innerHTML = `
+                <div style='text-align:center'>
+                    <div style='font-size:50px; margin-bottom:20px;'>🎉</div>
+                    <h3>모든 카드를 다 봤어요!</h3>
+                    <p>새로운 친구가 등록될 때까지 기다려주세요.</p>
+                    <button onclick='location.reload()' style='margin-top:20px; padding:10px; background:#333; color:white; border:none; border-radius:5px; cursor:pointer;'>처음부터 다시 보기</button>
+                </div>
+            `;
+            btnArea.style.display = 'none';
+            return;
+        } else {
+            if(!document.getElementById('p-name')) {
+                location.reload();
+                return;
+            }
+            btnArea.style.display = 'flex';
+        }
+
+        document.getElementById('p-emoji').innerText = user.emoji;
+        document.getElementById('p-field').innerText = user.field;
+        document.getElementById('p-name').innerText = user.name;
+        document.getElementById('p-intro').innerText = user.intro;
+
+        const contactDiv = document.getElementById('p-contact');
+        contactDiv.innerText = user.contact;
+        contactDiv.style.display = 'none';
+    }
+
+    // 3. 좋아요/넘기기 로직
+    function nextCard(isLike) {
+        if (isLike) {
+            const contactDiv = document.getElementById('p-contact');
+            alert("💖 좋아요! 상대방의 연락처를 확인하세요:\n\n" + contactDiv.innerText);
+            currentIndex++;
+            renderCard();
+        } else {
+            currentIndex++;
+            renderCard();
+        }
+    }
+
+    // 4. 카드 등록 함수
+    function openModal() {
+        document.getElementById('registerModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('registerModal').style.display = 'none';
+        document.getElementById('input-name').value = '';
+        document.getElementById('input-field').value = '';
+        document.getElementById('input-intro').value = '';
+        document.getElementById('input-contact').value = '';
+    }
+
+    function submitCard() {
+        const emoji = document.getElementById('input-emoji').value;
+        const name = document.getElementById('input-name').value;
+        const field = document.getElementById('input-field').value;
+        const intro = document.getElementById('input-intro').value;
+        const contact = document.getElementById('input-contact').value;
+
+        if (!name || !field) {
+            alert("이름과 분야는 필수입니다!");
+            return;
+        }
+
+        // 리스트에 추가 (맨 뒤에 추가됨)
+        const newUser = {
+            emoji: emoji,
+            name: name,
+            field: field,
+            intro: intro,
+            contact: contact
+        };
+
+        dummyUsers.push(newUser);
+
+        alert("등록되었습니다! 카드 리스트 마지막에 추가됩니다.");
+        closeModal();
+    }
+
+    // 초기 실행
+    renderCard();
+</script>
+{% endblock %}

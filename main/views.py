@@ -18,3 +18,6 @@ def index(request):
     }
 
     return render(request, 'main/index.html', context)
+
+def matching(request):
+    return render(request, 'matching/index.html')
