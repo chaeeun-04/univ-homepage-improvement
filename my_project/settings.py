@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'product',
     'pages',
-    'notifications'
+    'notifications',
+    'matching.apps.MatchingConfig'
 ]
 
 MIDDLEWARE = [
