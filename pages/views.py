@@ -34,3 +34,6 @@ def forms_view(request):
 
 def cafeteria_view(request):
     return render(request, 'pages/cafeteria.html')
+
+def matching(request):
+    return render(request, 'matching/index.html')
