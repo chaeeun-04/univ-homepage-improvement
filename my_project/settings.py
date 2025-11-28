@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-5_17)f^e1zp+_xdc_^=as0ymq6&1*hsb%+g4va6!l#iu%8qezz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -133,3 +133,6 @@ EMAIL_USE_TLS = True           # TLS 암호화 사용
 EMAIL_HOST_USER = 'your-gmail-id@gmail.com'  # 실제 Gmail 계정
 EMAIL_HOST_PASSWORD = 'your-gmail-app-password'  # Gmail 앱 비밀번호
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER         # 기본 발신 이메일
+
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
